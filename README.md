@@ -1,5 +1,7 @@
 # RC16 - a 16bit RISC computer
 
+RC16 is a 16bit RISC computer which features a well-designed hardware, implemented in Logisim, and its own compiler, written in C++.
+
 # License
 
 This software is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License.

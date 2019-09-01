@@ -1,1 +1,1 @@
-# 16bit computer build
+# RC16 - a 16bit RISC computer

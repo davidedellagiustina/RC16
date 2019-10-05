@@ -10,6 +10,7 @@
 
 #include "src/main.hpp"
 #include "src/microops.cpp"
+#include "src/isa.cpp"
 
 // Prints usage help.
 // @return		String with usage help.

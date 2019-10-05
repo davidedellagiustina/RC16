@@ -20,8 +20,8 @@
 #define maxcond_err     "The given conditional code exceeds 4 bits or does not exist."
 #define maxop_err       "The given ALU op-code exceeds 3 bits."
 #define maxval_err      "The given immediate value exceeds 6 bits."
-#define ireg(r)         ((r>=0x0 && r<=0x7) || r==0x8 || r==0x9 || r==0xb || r==0xc) // Valid input registers
-#define oreg(r)         ((r>=0x0 && r<=0x7) || r==0xa) // Valid output registers
+#define ireg(r)         ((r>=R0 && r<=R7) || r==A || r==B || r==MAR || r==OR) // Valid input registers
+#define oreg(r)         ((r>=R0 && r<=R7) || r==OUT) // Valid output registers
 #define ireg_err        "The given register is not a valid input register."
 #define oreg_err        "The given register is not a valid output register."
 
@@ -30,7 +30,7 @@
 // @param reg2      Destination register [4 bits].
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string movreg(const int &reg1, const int &reg2, const int &cond = 0x0) {
+inline string MOVREG(const int &reg1, const int &reg2, const int &cond = AL) {
     uint16_t instr = 0x4000; // MOV(reg->reg) = 0b01.xxxx.0.xxxx.xxxx.0
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
@@ -48,7 +48,7 @@ inline string movreg(const int &reg1, const int &reg2, const int &cond = 0x0) {
 // @param reg       Source/destination register (depending on w) [4 bits].
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string movmem(const bool &w, const int &reg, const int &cond = 0x0) {
+inline string MOVMEM(const bool &w, const int &reg, const int &cond = AL) {
     uint16_t instr = 0x4200; // MOV (mem-op) = 0b01.xxxx.1.x.xxxx.0000
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
@@ -66,7 +66,7 @@ inline string movmem(const bool &w, const int &reg, const int &cond = 0x0) {
 // @param val       Immediate value [6 bits].
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string set(const int &reg, const int &val, const int &cond = 0x0) {
+inline string SET(const int &reg, const int &val, const int &cond = AL) {
     uint16_t instr = 0x8000; // SET = 0b01.xxxx.xxxx.xxxxxx
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
@@ -85,7 +85,7 @@ inline string set(const int &reg, const int &val, const int &cond = 0x0) {
 // @param setflags  ALU 'set flags' flag [1 bit].
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string exc(const int &opcode, const bool &notb, const bool &setflags, const int &cond = 0x0) {
+inline string EXC(const int &opcode, const bool &notb, const bool &setflags, const int &cond = AL) {
     uint16_t instr = 0xc000; // EXC = 0b11.xxxx.xxx.x.x.00000
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
@@ -99,7 +99,7 @@ inline string exc(const int &opcode, const bool &notb, const bool &setflags, con
 // Implement NOP instruction.
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string nop(const int &cond = 0x0) {
+inline string NOP(const int &cond = AL) {
     uint16_t instr = 0x0; // NOP = 0b00.xxxx.000000000.0
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
@@ -109,7 +109,7 @@ inline string nop(const int &cond = 0x0) {
 // Implement HLT instruction.
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
-inline string hlt(const int &cond = 0x0) {
+inline string HLT(const int &cond = AL) {
     uint16_t instr = 0x1; // HLT = 0b00.xxxx.000000000.1
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;

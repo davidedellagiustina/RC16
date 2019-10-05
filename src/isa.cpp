@@ -57,6 +57,27 @@ inline string str(const int &reg, const int &reg_addr, const int &cond = AL) {
     return os.str();
 }
 
+// ADD <reg> <reg> <reg>: add two values into a register.
+// @param reg1      Register containing operand 1.
+// @param reg2      Register containing operand 2.
+// @param reg3      Destination register.
+// @param s         Update flags if 1, do not otherwise.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string add(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
+    oss os;
+    if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+        os << MOVREG(reg3, A);
+        os << SET(B, 0);
+        os << EXC(ADD, false, s);
+    }
+    os << MOVREG(reg1, A, cond);
+    os << MOVREG(reg2, B, cond);
+    os << EXC(ADD, false, s, cond);
+    os << MOVREG(OUT, reg3);
+    return os.str();
+}
+
 // PRT <reg>: print value contained in register.
 // @param reg       Source register.
 // @param cond      Conditional. Defualt: AL.

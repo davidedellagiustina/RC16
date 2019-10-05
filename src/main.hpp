@@ -16,7 +16,7 @@
 using namespace std;
 
 // Macros
-#define nl		"\n"
+#define nl		'\n'
 #define pb		bushback
 #define iss		istringstream
 #define oss		ostringstream

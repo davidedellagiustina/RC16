@@ -15,10 +15,12 @@
 #define maxreg          0xc // Max register address
 #define maxcond         0xa // Max conditional code
 #define maxop           0x7 // Max ALU op-code
+#define minval          0x0 // Minimum immediate value
 #define maxval          0x3f // Max immediate value
 #define maxreg_err      "The given register code exceeds 4 bits or does not exist."
 #define maxcond_err     "The given conditional code exceeds 4 bits or does not exist."
 #define maxop_err       "The given ALU op-code exceeds 3 bits."
+#define minval_err      "The given immediate value is negative."
 #define maxval_err      "The given immediate value exceeds 6 bits."
 #define ireg(r)         ((r>=R0 && r<=R7) || r==A || r==B || r==MAR || r==OR) // Valid input registers
 #define oreg(r)         ((r>=R0 && r<=R7) || r==OUT) // Valid output registers
@@ -74,8 +76,9 @@ inline string SET(const int &reg, const int &val, const int &cond = AL) {
         if (ireg(reg)) instr |= reg << 6; // Add destination register
         else throw ireg_err;
     } else throw maxreg_err;
-    if (val <= maxval) instr |= val; // Add immediate value
-    else throw maxval_err;
+    if (val >= minval && val <= maxval) instr |= val; // Add immediate value
+    else if (val >= minval) throw maxval_err;
+    else throw minval_err;
     return bin2hex(instr);
 }
 

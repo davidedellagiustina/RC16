@@ -74,7 +74,7 @@ inline string add(const int &reg1, const int &reg2, const int &reg3, const bool 
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
     os << EXC(ADD, false, s, cond);
-    os << MOVREG(OUT, reg3);
+    os << MOVREG(OUT, reg3, (s?AL:cond));
     return os.str();
 }
 
@@ -95,7 +95,7 @@ inline string sub(const int &reg1, const int &reg2, const int &reg3, const bool 
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
     os << EXC(ADD, true, s, cond);
-    os << MOVREG(OUT, reg3);
+    os << MOVREG(OUT, reg3, (s?AL:cond));
     return os.str();
 }
 
@@ -106,7 +106,7 @@ inline string sub(const int &reg1, const int &reg2, const int &reg3, const bool 
 // @param s         Update flags if 1, do not otherwise.
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
-inline string and(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
+inline string _and(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
         os << MOVREG(reg3, A);
@@ -116,7 +116,7 @@ inline string and(const int &reg1, const int &reg2, const int &reg3, const bool 
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
     os << EXC(AND, false, s, cond);
-    os << MOVREG(OUT, reg3);
+    os << MOVREG(OUT, reg3, (s?AL:cond));
     return os.str();
 }
 
@@ -137,18 +137,18 @@ inline string orr(const int &reg1, const int &reg2, const int &reg3, const bool 
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
     os << EXC(ORR, false, s, cond);
-    os << MOVREG(OUT, reg3);
+    os << MOVREG(OUT, reg3, (s?AL:cond));
     return os.str();
 }
 
-// XOR <reg> <reg> <reg>: perform bitwise xor of two values into a register.
+// EOR <reg> <reg> <reg>: perform bitwise xor of two values into a register.
 // @param reg1      Register containing operand 1.
 // @param reg2      Register containing operand 2.
 // @param reg3      Destination register.
 // @param s         Update flags if 1, do not otherwise.
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
-inline string xor(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
+inline string eor(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
         os << MOVREG(reg3, A);
@@ -158,7 +158,70 @@ inline string xor(const int &reg1, const int &reg2, const int &reg3, const bool 
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
     os << EXC(XOR, false, s, cond);
-    os << MOVREG(OUT, reg3);
+    os << MOVREG(OUT, reg3, (s?AL:cond));
+    return os.str();
+}
+
+// LSL <reg> <reg> <reg_shift>: perform logical left shift of a register into another register.
+// @param reg1      Register containing operand 1.
+// @param reg_shift Register containing shift value.
+// @param reg2      Destination register.
+// @param s         Update flags if 1, do not otherwise.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string lsl(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
+    oss os;
+    if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+        os << MOVREG(reg2, A);
+        os << SET(B, 0);
+        os << EXC(ADD, false, false);
+    }
+    os << MOVREG(reg1, A, cond);
+    os << MOVREG(reg_shift, B, cond);
+    os << EXC(LSL, false, s, cond);
+    os << MOVREG(OUT, reg2, (s?AL:cond));
+    return os.str();
+}
+
+// LSR <reg> <reg> <reg_shift>: perform logical right shift of a register into another register.
+// @param reg1      Register containing operand 1.
+// @param reg_shift Register containing shift value.
+// @param reg2      Destination register.
+// @param s         Update flags if 1, do not otherwise.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string lsr(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
+    oss os;
+    if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+        os << MOVREG(reg2, A);
+        os << SET(B, 0);
+        os << EXC(ADD, false, false);
+    }
+    os << MOVREG(reg1, A, cond);
+    os << MOVREG(reg_shift, B, cond);
+    os << EXC(LSR, false, s, cond);
+    os << MOVREG(OUT, reg2, (s?AL:cond));
+    return os.str();
+}
+
+// ASR <reg> <reg> <reg_shift>: perform arithmetical right shift of a register into another register.
+// @param reg1      Register containing operand 1.
+// @param reg_shift Register containing shift value.
+// @param reg2      Destination register.
+// @param s         Update flags if 1, do not otherwise.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string asr(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
+    oss os;
+    if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+        os << MOVREG(reg2, A);
+        os << SET(B, 0);
+        os << EXC(ADD, false, false);
+    }
+    os << MOVREG(reg1, A, cond);
+    os << MOVREG(reg_shift, B, cond);
+    os << EXC(ASR, false, s, cond);
+    os << MOVREG(OUT, reg2, (s?AL:cond));
     return os.str();
 }
 

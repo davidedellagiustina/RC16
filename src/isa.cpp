@@ -57,6 +57,14 @@ inline string str(const int &reg, const int &reg_addr, const int &cond = AL) {
     return os.str();
 }
 
+// PRT <reg>: print value contained in register.
+// @param reg       Source register.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string prt(const int &reg, const int &cond = AL) {
+    return MOVREG(reg, OR, cond);
+}
+
 // CMP <reg> <reg>: update flags basing on subtraction.
 // @param reg1      Register 1.
 // @param reg2      Register 2.

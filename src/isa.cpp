@@ -33,6 +33,18 @@ inline string mov(const int &reg1, const int &reg2, const int &cond = AL) {
     return MOVREG(reg1, reg2, cond);
 }
 
+// LDR <reg> <reg_addr>: load value from memory to register.
+// @param reg       Destination register.
+// @param reg_addr  Register containing memory address.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string ldr(const int &reg, const int &reg_addr, const int &cond = AL) {
+    oss os;
+    os << MOVREG(reg_addr, MAR, cond);
+    os << MOVMEM(false, reg, cond);
+    return os.str();
+}
+
 // CMP <reg> <reg>: update flags basing on subtraction.
 // @param reg1      Register 1.
 // @param reg2      Register 2.
@@ -43,7 +55,7 @@ inline string cmp(const int &reg1, const int &reg2, const int &cond = AL) {
     // Flags do get updated, but result remains in OUT register
     os << MOVREG(reg1, A, cond);
     os << MOVREG(reg2, B, cond);
-    os << EXC(SUB, true, true, cond);
+    os << EXC(ADD, true, true, cond);
     return os.str();
 }
 

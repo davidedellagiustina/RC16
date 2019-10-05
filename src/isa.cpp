@@ -45,6 +45,18 @@ inline string ldr(const int &reg, const int &reg_addr, const int &cond = AL) {
     return os.str();
 }
 
+// STR <reg> <reg_addr>: store value in memory from register.
+// @param reg       Source register.
+// @param reg_addr  Register containing memory address.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string str(const int &reg, const int &reg_addr, const int &cond = AL) {
+    oss os;
+    os << MOVREG(reg_addr, MAR, cond);
+    os << MOVMEM(true, reg, cond);
+    return os.str();
+}
+
 // CMP <reg> <reg>: update flags basing on subtraction.
 // @param reg1      Register 1.
 // @param reg2      Register 2.

@@ -24,6 +24,15 @@ inline string set(const int &reg, const int &val, const int &cond = AL) {
     return os.str();
 }
 
+// MOV <reg> <reg>: move a value from a register to another.
+// @param reg1      Source register.
+// @param reg2      Destination register.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string mov(const int &reg1, const int &reg2, const int &cond = AL) {
+    return MOVREG(reg1, reg2, cond);
+}
+
 // CMP <reg> <reg>: update flags basing on subtraction.
 // @param reg1      Register 1.
 // @param reg2      Register 2.

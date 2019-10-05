@@ -14,7 +14,7 @@
 // Bit length and correctness checks
 #define maxreg          0xc // Max register address
 #define maxcond         0xa // Max conditional code
-#define maxop           0x7 // Max ALU op-cpde
+#define maxop           0x7 // Max ALU op-code
 #define maxval          0x3f // Max immediate value
 #define maxreg_err      "The given register code exceeds 4 bits or does not exist."
 #define maxcond_err     "The given conditional code exceeds 4 bits or does not exist."
@@ -43,13 +43,13 @@ inline string movreg(const int &reg1, const int &reg2, const int &cond = 0x0) {
     return bin2hex(instr);
 }
 
-// Implement MOV (mem op) instruction.
+// Implement MOV (mem-op) instruction.
 // @param w         Write if set, read otherwise.
 // @param reg       Source/destination register (depending on w) [4 bits].
 // @param cond      Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
 inline string movmem(const bool &w, const int &reg, const int &cond = 0x0) {
-    uint16_t instr = 0x4200; // MOV (mem op) = 0b01.xxxx.1.x.xxxx.0000
+    uint16_t instr = 0x4200; // MOV (mem-op) = 0b01.xxxx.1.x.xxxx.0000
     if (cond <= maxcond) instr |= cond << 10; // Add conditional
     else throw maxcond_err;
     if (w) instr |= 1 << 8; // Add 'r/w' flag

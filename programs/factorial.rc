@@ -1,0 +1,41 @@
+# COMPUTE THE FACTORIAL OF A NUMBER
+# 
+# Davide Della Giustina
+# 06/10/2019
+
+.data
+    :n 7
+
+.prgm
+    :main
+        put r0 $n
+        ldr r1 r0
+        mov r0 r1
+        set r2 2
+        set r3 1
+    :loop
+        cmp r1 r2
+        jmpeq $exit
+        sub r1 r1 r3
+        psh r1
+        psh r2
+        psh r3
+        jlk $mul
+        pop r3
+        pop r2
+        pop r1
+        jmp $loop
+    :mul
+        mov r2 r0
+        set r3 1
+    :mulloop
+        cmp r1 r3
+        jmpeq $mulexit
+        sub r1 r1 r3
+        add r0 r0 r2
+        jmp $mulloop
+    :mulexit
+        mov pc lr
+    :exit
+        prt r1
+        hlt

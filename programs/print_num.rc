@@ -1,0 +1,14 @@
+# LOAD A NUMBER FROM MEMORY AND PRINT IT
+# 
+# Davide Della Giustina
+# 06/10/2019
+
+.data
+    :n 5
+
+.prgm
+    :main
+        put r0 $n
+        ldr r1 r0
+        prt r1
+        hlt

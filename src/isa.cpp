@@ -11,14 +11,22 @@
 #ifndef ISA
 #define ISA
 
-// PUT <reg> <addr>: load a register with a 16bit address. May result in many operations. 
+// PUT <reg> <addr>: load a register with a 16bit address. Very expensive.
 // @param reg       Destination register
 // @param addr      Address.
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
-inline string put(const int &reg, const uint16_t addr, const int &cond = AL) {
+inline string put(const int &reg, const uint16_t &addr, const int &cond = AL) {
     oss os;
-
+    uint16_t a1 = addr >> 12; // Part 1 [4 bits]
+    uint16_t a2 = (addr >> 6) & 0x3f; // Part 2 [6 bits]
+    uint16_t a3 = addr & 0x3f; // Part 3 [6 bits]
+    os << SET(A, a1, cond) << " ";
+    if (a1 != 0x0) os << SET(B, 6, cond) << " " << EXC(LSL, false, false, cond) << " " << MOVREG(OUT, A, cond) << " ";
+    if (a2 != 0x0) os << SET(B, a2, cond) << " " << EXC(ORR, false, false, cond) << " " << MOVREG(OUT, A, cond) << " ";
+    if (a1 != 0x0 || a2 != 0x0) os << SET(B, 6, cond) << " " << EXC(LSL, false, false, cond) << " " << MOVREG(OUT, A, cond) << " ";
+    if (a3 != 0x0) os << SET(B, a3, cond) << " " << EXC(ORR, false, false, cond) << " ";
+    os << MOVREG(OUT, reg, cond) << " ";
     return os.str();
 }
 

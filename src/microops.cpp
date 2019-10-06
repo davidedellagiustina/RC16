@@ -4,7 +4,7 @@
  * ===================
  * 
  * MICRO OPERATIONS DEFINITION
- * Della Giustina Davide
+ * Davide Della Giustina
  * 05/10/2019
  */
 

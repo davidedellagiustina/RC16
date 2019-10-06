@@ -4,12 +4,23 @@
  * ===================
  * 
  * ISA DEFINITION
- * Della Giustina Davide
+ * Davide Della Giustina
  * 05/10/2019
  */
 
 #ifndef ISA
 #define ISA
+
+// PUT <reg> <addr>: load a register with a 16bit address. May result in many operations. 
+// @param reg       Destination register
+// @param addr      Address.
+// @param cond      Conditional. Defualt: AL.
+// @return          Hexadecimal string representation of command.
+inline string put(const int &reg, const uint16_t addr, const int &cond = AL) {
+    oss os;
+
+    return os.str();
+}
 
 // SET <reg> <val>: save immediate value to register.
 // @param reg       Destination register.
@@ -19,7 +30,7 @@
 inline string set(const int &reg, const int &val, const int &cond = AL) {
     oss os;
     try {
-        os << SET(reg, val, cond);
+        os << SET(reg, val, cond) << " ";
     } catch (...) { throw "The given value is too big. Maximum is 63."; }
     return os.str();
 }
@@ -30,7 +41,7 @@ inline string set(const int &reg, const int &val, const int &cond = AL) {
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
 inline string mov(const int &reg1, const int &reg2, const int &cond = AL) {
-    return MOVREG(reg1, reg2, cond);
+    return MOVREG(reg1, reg2, cond) + " ";
 }
 
 // LDR <reg> <reg_addr>: load value from memory to register.
@@ -40,8 +51,8 @@ inline string mov(const int &reg1, const int &reg2, const int &cond = AL) {
 // @return          Hexadecimal string representation of command.
 inline string ldr(const int &reg, const int &reg_addr, const int &cond = AL) {
     oss os;
-    os << MOVREG(reg_addr, MAR, cond);
-    os << MOVMEM(false, reg, cond);
+    os << MOVREG(reg_addr, MAR, cond) << " ";
+    os << MOVMEM(false, reg, cond) << " ";
     return os.str();
 }
 
@@ -52,8 +63,8 @@ inline string ldr(const int &reg, const int &reg_addr, const int &cond = AL) {
 // @return          Hexadecimal string representation of command.
 inline string str(const int &reg, const int &reg_addr, const int &cond = AL) {
     oss os;
-    os << MOVREG(reg_addr, MAR, cond);
-    os << MOVMEM(true, reg, cond);
+    os << MOVREG(reg_addr, MAR, cond) << " ";
+    os << MOVMEM(true, reg, cond) << " ";
     return os.str();
 }
 
@@ -67,14 +78,14 @@ inline string str(const int &reg, const int &reg_addr, const int &cond = AL) {
 inline string add(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg3, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg3, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(ADD, false, s, cond);
-    os << MOVREG(OUT, reg3, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(ADD, false, s, cond) << " ";
+    os << MOVREG(OUT, reg3, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -88,14 +99,14 @@ inline string add(const int &reg1, const int &reg2, const int &reg3, const bool 
 inline string sub(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg3, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg3, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(ADD, true, s, cond);
-    os << MOVREG(OUT, reg3, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(ADD, true, s, cond) << " ";
+    os << MOVREG(OUT, reg3, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -109,14 +120,14 @@ inline string sub(const int &reg1, const int &reg2, const int &reg3, const bool 
 inline string _and(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg3, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg3, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(AND, false, s, cond);
-    os << MOVREG(OUT, reg3, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(AND, false, s, cond) << " ";
+    os << MOVREG(OUT, reg3, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -130,14 +141,14 @@ inline string _and(const int &reg1, const int &reg2, const int &reg3, const bool
 inline string orr(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg3, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg3, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(ORR, false, s, cond);
-    os << MOVREG(OUT, reg3, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(ORR, false, s, cond) << " ";
+    os << MOVREG(OUT, reg3, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -151,14 +162,14 @@ inline string orr(const int &reg1, const int &reg2, const int &reg3, const bool 
 inline string eor(const int &reg1, const int &reg2, const int &reg3, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg3, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg3, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(XOR, false, s, cond);
-    os << MOVREG(OUT, reg3, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(XOR, false, s, cond) << " ";
+    os << MOVREG(OUT, reg3, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -172,14 +183,14 @@ inline string eor(const int &reg1, const int &reg2, const int &reg3, const bool 
 inline string lsl(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg2, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg2, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg_shift, B, cond);
-    os << EXC(LSL, false, s, cond);
-    os << MOVREG(OUT, reg2, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg_shift, B, cond) << " ";
+    os << EXC(LSL, false, s, cond) << " ";
+    os << MOVREG(OUT, reg2, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -193,14 +204,14 @@ inline string lsl(const int &reg1, const int &reg_shift, const int &reg2, const 
 inline string lsr(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg2, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg2, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg_shift, B, cond);
-    os << EXC(LSR, false, s, cond);
-    os << MOVREG(OUT, reg2, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg_shift, B, cond) << " ";
+    os << EXC(LSR, false, s, cond) << " ";
+    os << MOVREG(OUT, reg2, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -214,14 +225,14 @@ inline string lsr(const int &reg1, const int &reg_shift, const int &reg2, const 
 inline string asr(const int &reg1, const int &reg_shift, const int &reg2, const bool &s, const int &cond = AL) {
     oss os;
     if (s && cond != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
-        os << MOVREG(reg2, A);
-        os << SET(B, 0);
-        os << EXC(ADD, false, false);
+        os << MOVREG(reg2, A) << " ";
+        os << SET(B, 0) << " ";
+        os << EXC(ADD, false, false) << " ";
     }
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg_shift, B, cond);
-    os << EXC(ASR, false, s, cond);
-    os << MOVREG(OUT, reg2, (s?AL:cond));
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg_shift, B, cond) << " ";
+    os << EXC(ASR, false, s, cond) << " ";
+    os << MOVREG(OUT, reg2, (s?AL:cond)) << " ";
     return os.str();
 }
 
@@ -230,7 +241,7 @@ inline string asr(const int &reg1, const int &reg_shift, const int &reg2, const 
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
 inline string prt(const int &reg, const int &cond = AL) {
-    return MOVREG(reg, OR, cond);
+    return MOVREG(reg, OR, cond) + " ";
 }
 
 // CMP <reg> <reg>: update flags basing on subtraction.
@@ -241,9 +252,9 @@ inline string prt(const int &reg, const int &cond = AL) {
 inline string cmp(const int &reg1, const int &reg2, const int &cond = AL) {
     oss os;
     // Flags do get updated, but result remains in OUT register
-    os << MOVREG(reg1, A, cond);
-    os << MOVREG(reg2, B, cond);
-    os << EXC(ADD, true, true, cond);
+    os << MOVREG(reg1, A, cond) << " ";
+    os << MOVREG(reg2, B, cond) << " ";
+    os << EXC(ADD, true, true, cond) << " ";
     return os.str();
 }
 
@@ -254,12 +265,12 @@ inline string cmp(const int &reg1, const int &reg2, const int &cond = AL) {
 inline string jmp(const int &reladdr, const int &cond = AL) {
     oss os;
     // Since flags are not being updated, this version is fine
-    os << MOVREG(PC, A, cond);
+    os << MOVREG(PC, A, cond) << " ";
     try {
-        os << SET(B, reladdr, cond);
+        os << SET(B, reladdr, cond) << " ";
     } catch (...) { throw "Cannot jump this long!"; }
-    os << EXC(ADD, false, false, cond);
-    os << MOVREG(OUT, PC, cond);
+    os << EXC(ADD, false, false, cond) << " ";
+    os << MOVREG(OUT, PC, cond) << " ";
     return os.str();
 }
 
@@ -267,14 +278,14 @@ inline string jmp(const int &reladdr, const int &cond = AL) {
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
 inline string nop(const int &cond = AL) {
-    return NOP(cond);
+    return NOP(cond) + " ";
 }
 
 // HLT: halt program execution.
 // @param cond      Conditional. Defualt: AL.
 // @return          Hexadecimal string representation of command.
 inline string hlt(const int &cond = AL) {
-    return HLT(cond);
+    return HLT(cond) + " ";
 }
 
 #endif

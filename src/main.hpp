@@ -4,7 +4,7 @@
  * ===================
  * 
  * MAIN HEADER
- * Della Giustina Davide
+ * Davide Della Giustina
  * 05/10/2019
  */
 
@@ -12,12 +12,15 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+#include <vector>
+#include <unordered_map>
 #include <unistd.h>
 using namespace std;
 
 // Macros
 #define nl		'\n'
-#define pb		bushback
+#define pb		push_back
 #define iss		istringstream
 #define oss		ostringstream
 #define ifs		ifstream
@@ -64,6 +67,16 @@ using namespace std;
 #define LSR     0x6
 #define ASR     0x7
 
+// Memory sections
+#define mem_init	0x0000
+#define mem_end		0xffff // Total memory: 128kB
+#define mem_idat	0x0008
+#define mem_edat	0x3fff // Program data: ~32kB [0x0 -> 0x7 (16B) reserved for initialization]
+#define mem_iprg	0x4000
+#define mem_eprg	0xbfff // Program instructions: 64kB
+#define mem_istk	0xc000
+#define mem_estk	0xffff // Stack: 32kB
+
 // Checks whether a file exists and is accessible or not.
 // @param file		File name.
 // @return			True if file exists and is accessible, false otherwise.
@@ -72,7 +85,7 @@ inline bool fexists(const string file) {
 	return (bool)f;
 }
 
-// Converts a binary 16-bit number to its hexadecimal string representation
+// Converts a binary 16-bit number to its hexadecimal string representation.
 // @param bin		Binary number.
 // @return			Hexadecimal string representation of the number.
 inline string bin2hex(const uint16_t bin) {
@@ -84,4 +97,39 @@ inline string bin2hex(const uint16_t bin) {
 		shift -= 4;
 	}
 	return hex;
+}
+
+// Trim a string.
+// @param s		String.
+// @return		Trimmed string.
+inline string trim(const string &s) {
+	string t = s;
+	while (t[0] == ' ') t = t.substr(1);
+	while (t[t.length()-1] == ' ') t = t.substr(0, t.length()-1);
+	return t;
+}
+
+// Transform a string to lowercase.
+// @param s		String.
+// @return		Lowercase string.
+inline string lc(const string &s) {
+	string t = "";
+	for (char c : s) t += std::tolower(c);
+	return t;
+}
+
+// Split a string basing on a certain delim character.
+// @param s			String to be split.
+// @param delim		Delimitator.
+// @return			Vector of split strings.
+inline vector<string> split(const string &s, const char &delim) {
+	vector<string> out; out.pb("");
+	int ptr = 0;
+	for (char c : s) {
+		if (c == delim) {
+			out.pb("");
+			++ptr;
+		} else out[ptr] += c;
+	}
+	return out;
 }

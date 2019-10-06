@@ -4,13 +4,14 @@
  * ===================
  * 
  * MAIN
- * Della Giustina Davide
+ * Davide Della Giustina
  * 05/10/2019
  */
 
 #include "src/main.hpp"
 #include "src/microops.cpp"
 #include "src/isa.cpp"
+#include "src/parser.cpp"
 
 // Prints usage help.
 // @return		String with usage help.
@@ -23,6 +24,25 @@ string help() {
 	" -h		Print this help.";
 	return os.str();
 }
+
+// Compile a program into a binary file.
+// @param src		Source filename.
+// @param dst		Destination filename.
+void compilePrg(const string &src, const string &dst) {
+	ofs bin(dst);
+	// Header
+	bin << "v2.0 raw" << nl;
+	// Init instructions
+	bin << SET(A, 0) << " " << EXC(NOT, false, false) << " " << MOVREG(OUT, SP) << nl; // SP = mem_estk (0xffff)
+	bin << SET(A, 32) << " " << SET(B, 9) << " " << EXC(LSL, false, false) << " " << MOVREG(OUT, LR) << nl; // LR = mem_iprg (0x4000)
+	bin << MOVREG(OUT, PC) << nl; // PC = mem_iprg (0x4000)
+	// Parse program
+	bin << parsePrg(src);
+	bin.close();
+}
+
+// Global variables
+unordered_map<string,uint16_t> labels;
 
 // Main.
 int main(int argc, char* argv[]) {
@@ -47,9 +67,8 @@ int main(int argc, char* argv[]) {
 	}
 	if (ifile.compare("") == 0) { cerr << "No input file given." << nl; return -1; }
 	if (!fexists(ifile)) { cerr << "Given file does not exist or is unaccessible." << nl; return -1; } // Check ifile existence and accessibility
-	if (ofile.compare("") == 0) ofile = "a"; // If ofile not given
-	ofile += ".rc"; // Extension
-	// Compile given file
-	// TODO
+	if (ofile.compare("") == 0) ofile = "a.bin"; // If ofile not given
+	// Compile given program
+	compilePrg(ifile, ofile);
 	return 0;
 }

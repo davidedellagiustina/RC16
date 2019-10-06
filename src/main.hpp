@@ -123,13 +123,14 @@ inline string lc(const string &s) {
 // @param delim		Delimitator.
 // @return			Vector of split strings.
 inline vector<string> split(const string &s, const char &delim) {
-	vector<string> out; out.pb("");
+	vector<string> out;
 	int ptr = 0;
-	for (char c : s) {
-		if (c == delim) {
+	if (s.length() > 0) out.pb("");
+	for (int i = 0; i < s.length(); ++i) {
+		if (s[i] == delim && i < s.length()) {
 			out.pb("");
 			++ptr;
-		} else out[ptr] += c;
+		} else if (s[i] != delim) out[ptr] += s[i];
 	}
 	return out;
 }

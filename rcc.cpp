@@ -41,9 +41,6 @@ void compilePrg(const string &src, const string &dst) {
 	bin.close();
 }
 
-// Global variables
-unordered_map<string,uint16_t> labels;
-
 // Main.
 int main(int argc, char* argv[]) {
 	string ifile, ofile = "";

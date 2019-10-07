@@ -4,6 +4,10 @@ RC16 is a 16bit RISC computer which features a well-designed hardware, implement
 
 ![](imgs/cpu.png)
 
+# Usage
+
+// TODO
+
 # License
 
 This software is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License.

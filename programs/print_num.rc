@@ -4,11 +4,11 @@
 # 06/10/2019
 
 .data
-    :n 5
+    &n= 5
 
 .prgm
-    :main
-        put r0 $n
-        ldr r1 r0
-        prt r1
+    &main
+        put: r0, $n
+        ldr: r1, r0
+        prt: r1
         hlt

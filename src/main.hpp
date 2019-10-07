@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
+#include <stdexcept>
 #include <unistd.h>
 using namespace std;
 
@@ -27,45 +28,13 @@ using namespace std;
 #define ofs		ofstream
 
 // Condition codes
-#define AL      0x0
-#define EQ      0x1
-#define NE      0x2
-#define LT      0x3
-#define LE      0x4
-#define GT      0x5
-#define GE      0x6
-#define VS      0x7
-#define VC      0x8
-#define CS      0x9
-#define CC      0xa
+enum cond : uint8_t { AL = 0x0, EQ = 0x1, NE = 0x2, LT = 0x3, LE = 0x4, GT = 0x5, GE = 0x6, VS = 0x7, VC = 0x8, CS = 0x9, CC = 0xa };
 
 // Registers
-#define R0      0x0
-#define R1      0x1
-#define R2      0x2
-#define R3      0x3
-#define R4      0x4
-#define R5      0x5
-#define SP		0x5
-#define R6      0x6
-#define LR		0x6
-#define R7      0x7
-#define PC		0x7
-#define A       0x8
-#define B       0x9
-#define OUT     0xa
-#define MAR     0xb
-#define OR      0xc
+enum reg : uint8_t { R0 = 0x0, R1 = 0x1, R2 = 0x2, R3 = 0x3, R4 = 0x4, R5 = 0x5, SP = 0x5, R6 = 0x6, LR = 0x6, R7 = 0x7, PC = 0x7, A = 0x8, B = 0x9, OUT = 0xa, MAR = 0xb, OR = 0xc };
 
 // ALU op-codes
-#define ADD     0x0
-#define AND     0x1
-#define ORR     0x2
-#define XOR     0x3
-#define NOT     0x4
-#define LSL     0x5
-#define LSR     0x6
-#define ASR     0x7
+enum alu_op : uint8_t { ADD = 0x0, AND = 0x1, ORR = 0x2, EOR = 0x3, NOT = 0x4, LSL = 0x5, LSR = 0x6, ASR = 0x7 };
 
 // Memory sections
 #define mem_init	0x0000

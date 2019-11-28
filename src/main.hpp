@@ -20,12 +20,24 @@
 using namespace std;
 
 // Macros
-#define nl		'\n'
 #define pb		push_back
-#define iss		istringstream
-#define oss		ostringstream
-#define ifs		ifstream
-#define ofs		ofstream
+
+// Types
+typedef istringstream iss;
+typedef ostringstream oss;
+typedef ifstream ifs;
+typedef ofstream ofs;
+
+// Constexprs
+constexpr char nl = '\n';
+constexpr uint16_t mem_init = 0x0000;
+constexpr uint16_t mem_end = 0xffff; // Total memory: 128kB
+constexpr uint16_t mem_idat = 0x0008;
+constexpr uint16_t mem_edat = 0x3fff; // Program data: ~32kB [0x0 -> 0x7 (16B) reserved for initialization]
+constexpr uint16_t mem_iprg = 0x4000;
+constexpr uint16_t mem_eprg = 0xbfff; // Program instructions: 64kB
+constexpr uint16_t mem_istk = 0xc000;
+constexpr uint16_t mem_estk = 0xffff; // Stack: 32kB
 
 // Condition codes
 enum cond : uint8_t { AL = 0x0, EQ = 0x1, NE = 0x2, LT = 0x3, LE = 0x4, GT = 0x5, GE = 0x6, VS = 0x7, VC = 0x8, CS = 0x9, CC = 0xa };
@@ -36,22 +48,14 @@ enum reg : uint8_t { R0 = 0x0, R1 = 0x1, R2 = 0x2, R3 = 0x3, R4 = 0x4, R5 = 0x5,
 // ALU op-codes
 enum alu_op : uint8_t { ADD = 0x0, AND = 0x1, ORR = 0x2, EOR = 0x3, NOT = 0x4, LSL = 0x5, LSR = 0x6, ASR = 0x7 };
 
-// Memory sections
-#define mem_init	0x0000
-#define mem_end		0xffff // Total memory: 128kB
-#define mem_idat	0x0008
-#define mem_edat	0x3fff // Program data: ~32kB [0x0 -> 0x7 (16B) reserved for initialization]
-#define mem_iprg	0x4000
-#define mem_eprg	0xbfff // Program instructions: 64kB
-#define mem_istk	0xc000
-#define mem_estk	0xffff // Stack: 32kB
-
 // Checks whether a file exists and is accessible or not.
 // @param file		File name.
 // @return			True if file exists and is accessible, false otherwise.
-inline bool fexists(const string file) {
+inline bool fexists(const string &file) {
 	ifs f(file);
-	return (bool)f;
+	bool r = (bool)f;
+	f.close();
+	return r;
 }
 
 // Converts a binary 16-bit number to its hexadecimal string representation.

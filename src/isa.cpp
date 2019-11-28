@@ -194,7 +194,7 @@ inline string eor(const reg &r1, const reg &r2, const reg &r3, const bool &s, co
 // @return          Hexadecimal string representation of command.
 inline string lsl(const reg &r1, const reg &r_shift, const reg &r2, const bool &s, const cond &c = AL) {
     oss os;
-    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg2 to OUT to avoid errors
         os << MOVREG(r2, A) << " ";
         os << SET(B, 0) << " ";
         os << EXC(ADD, false, false) << " ";
@@ -215,7 +215,7 @@ inline string lsl(const reg &r1, const reg &r_shift, const reg &r2, const bool &
 // @return          Hexadecimal string representation of command.
 inline string lsr(const reg &r1, const reg &r_shift, const reg &r2, const bool &s, const cond &c = AL) {
     oss os;
-    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg2 to OUT to avoid errors
         os << MOVREG(r2, A) << " ";
         os << SET(B, 0) << " ";
         os << EXC(ADD, false, false) << " ";
@@ -236,7 +236,7 @@ inline string lsr(const reg &r1, const reg &r_shift, const reg &r2, const bool &
 // @return          Hexadecimal string representation of command.
 inline string asr(const reg &r1, const reg &r_shift, const reg &r2, const bool &s, const cond &c = AL) {
     oss os;
-    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg3 to OUT to avoid errors
+    if (s && c != AL) { // If flags need to get updated and condition is not AL, we need to copy reg2 to OUT to avoid errors
         os << MOVREG(r2, A) << " ";
         os << SET(B, 0) << " ";
         os << EXC(ADD, false, false) << " ";

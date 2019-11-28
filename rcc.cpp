@@ -37,13 +37,14 @@ void compilePrg(const string &src, const string &dst) {
 	bin << SET(A, 32) << " " << SET(B, 9) << " " << EXC(LSL, false, false) << " " << MOVREG(OUT, LR) << nl; // LR = mem_iprg (0x4000)
 	bin << MOVREG(OUT, PC) << nl; // PC = mem_iprg (0x4000)
 	// Parse program
-	bin << parsePrg(src);
+	bin << parsePrg(src) << nl;
+	bin << HLT();
 	bin.close();
 }
 
 // Main.
 int main(int argc, char* argv[]) {
-	string ifile, ofile = "";
+	string ifile = "", ofile = "";
 	// Parse command line options
 	int opt;
 	while ((opt = getopt(argc, argv, "i:o:h")) != -1) {

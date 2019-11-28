@@ -2,7 +2,7 @@
 
 RC16 is a 16bit RISC computer which features a well-designed hardware, implemented in Logisim, and its own assembler, written in C++.
 
-![](imgs/cpu.png)
+![Screenshot](imgs/cpu.png)
 
 # Usage
 

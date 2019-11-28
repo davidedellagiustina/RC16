@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := install
 
 CC = g++
-CFLAGS = -g -O3 -mtune=native -march=native
+CFLAGS =
 
 install:
 	$(CC) $(CFLAGS) rcc.cpp -o rcc

@@ -56,18 +56,41 @@ inline cond condition(const string &c) {
 	return m[c];
 }
 
+// Convert string register to reg.
+// @param r     String register.
+// @return      Integer register.
+inline reg regst(const string &r) {
+    unordered_map<string,reg> m;
+    m["r0"] = R0; m["r1"] = R1; m["r2"] = R2; m["r3"] = R3; m["r4"] = R4; m["r5"] = R5; m["sp"] = SP; m["r6"] = R6; m["lr"] = LR; m["r7"] = R7; m["pc"] = PC;
+    m["a"] = A; m["b"] = B; m["out"] = OUT; m["mar"] = MAR; m["or"] = OR;
+    return m[r];
+}
+
 // Compute number of microops needed to perform an instruction.
 // @param instr		Line of code.
 // @return			Number of microops.
 inline int nom(const string &line, unordered_map<string,uint16_t> &d_lbl) {
 	int c = 0;
-    vector<string> s = split(line, ':');
-	string instr = s[0]; // Instruction
-    vector<string> args;
-    if (s.size() > 1) args = split(trim(s[1]), ','); // Arguments
+    // Parse command
+    string instr = line.substr(0, 3); // Instruction
+    bool s = false; // 's' flag (used for ALU operations)
+    cond cnd = AL; // Conditional
+    if (line[3] == 's') {
+        s = true;
+        if (line[4] != ' ') cnd = condition(line.substr(4, 6));
+    } else {
+        if (line[3] != ' ') cnd = condition(line.substr(3, 5));
+    }
+    // Parse arguments
+    vector<string> tmp = split(line, ':'), args;
+    if (tmp.size() > 1) {
+        tmp[1] = trim(tmp[1]);
+        args = split(tmp[1], ',');
+        for (string &arg : args) arg = trim(arg);
+    }
 	// Complex commands
 	if (instr.compare("put") == 0) {
-		uint16_t addr = d_lbl[trim(args[1]).substr(1)], a1 = addr >> 12, a2 = (addr >> 6) & 0x3f, a3 = addr & 0x3f;
+		uint16_t addr = d_lbl[args[1].substr(1)], a1 = addr >> 12, a2 = (addr >> 6) & 0x3f, a3 = addr & 0x3f;
 		if (a1 != 0x0) c += 3;
 		if (a2 != 0x0) c += 3;
 		if (a1 != 0x0 || a2 != 0x0) c += 3;
@@ -75,12 +98,6 @@ inline int nom(const string &line, unordered_map<string,uint16_t> &d_lbl) {
 		c += 2;
 	// Four/seven-microop commands
 	} else if (instr.compare("add") == 0 || instr.compare("sub") == 0 || instr.compare("and") == 0 || instr.compare("orr") == 0 || instr.compare("eor") == 0 || instr.compare("lsl") == 0 || instr.compare("lsr") == 0 || instr.compare("asr") == 0) {
-		bool s = false;
-		string _c = "al";
-		if (line[3] == 's') s = true;
-		if (s && line[4] != ' ') _c = line.substr(4, 2);
-		else if (!s && line[3] != ' ') _c = line.substr(3, 2);
-		cond cnd = condition(_c);
 		if (s && cnd != AL) c += 3;
 		c += 4;
 	// Four-microop commands
@@ -92,16 +109,108 @@ inline int nom(const string &line, unordered_map<string,uint16_t> &d_lbl) {
 	// One-microop commands
 	else if (instr.compare("set") == 0 || instr.compare("mov") == 0 || instr.compare("prt") == 0 || instr.compare("nop") == 0 || instr.compare("hlt") == 0) ++c;
 	// Unknown command
-	else throw invalid_argument("Unknown instruction");
+	else throw invalid_argument("Unknown instruction.");
 	return c;
 }
 
 // Parse a single line of code (a single command)
 // @param line      Line of code.
 // @return          Corresponding command.
-inline string parseLine(const string &line) {
+inline string parseLine(const string &line, unordered_map<string,uint16_t> &d_lbl, unordered_map<string,uint16_t> &p_lbl) {
     oss os;
-    // TODO
+    string instr = line.substr(0, 3); // Instruction
+    bool s = false; // 's' flag (used for ALU operations)
+    cond c = AL; // Conditional
+    if (line[3] == 's') {
+        s = true;
+        if (line[4] != ' ') c = condition(line.substr(4, 2));
+    } else {
+        if (line[3] != ' ') c = condition(line.substr(3, 2));
+    }
+    // Parse arguments
+    vector<string> tmp = split(line, ':'), args;
+    if (tmp.size() > 1) {
+        tmp[1] = trim(tmp[1]);
+        args = split(tmp[1], ',');
+        for (string &arg : args) arg = trim(arg);
+    }
+    // Decode instruction
+    if (instr.compare("put") == 0) { // PUT instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        uint16_t imm_val;
+        if (args[1][0] == '$') {
+            if (d_lbl.find(args[1].substr(1)) == d_lbl.end()) throw invalid_argument("Invalid label.");
+            imm_val = d_lbl[args[1].substr(1)];
+        } else imm_val = (uint16_t)atoi(args[1].c_str());
+        os << put(regst(args[0]), imm_val, c);
+    } else if (instr.compare("set") == 0) { // SET instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        int imm_val;
+        if (args[1][0] == '$') {
+            if (d_lbl.find(args[1].substr(1)) == d_lbl.end()) throw invalid_argument("Invalid label.");
+            imm_val = d_lbl[args[1].substr(1)];
+        } else imm_val = (uint16_t)atoi(args[1].c_str());
+        try {
+            os << set(regst(args[0]), imm_val, c);
+        } catch (invalid_argument &e) {
+            throw e;
+        } catch (out_of_range &e) {
+            throw e;
+        }
+    } else if (instr.compare("mov") == 0) { // MOV instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        os << mov(regst(args[1]), regst(args[0]), c);
+    } else if (instr.compare("ldr") == 0) { // LDR instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        os << ldr(regst(args[0]), regst(args[1]), c);
+    } else if (instr.compare("str") == 0) { // STR instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        os << str(regst(args[1]), regst(args[0]), c);
+    } else if (instr.compare("add") == 0) { // ADD instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << add(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("sub") == 0) { // SUB instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << sub(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("and") == 0) { // AND instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << _and(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("orr") == 0) { // ORR instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << orr(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("eor") == 0) { // EOR instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << eor(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("lsl") == 0) { // LSL instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << lsl(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("lsr") == 0) { // LSR instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << lsr(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("asr") == 0) { // ASR instruction
+        if (args.size() < 3) throw invalid_argument("Too few arguments.");
+        os << asr(regst(args[1]), regst(args[2]), regst(args[0]), s, c);
+    } else if (instr.compare("prt") == 0) { // PRT instruction
+        if (args.size() < 1) throw invalid_argument("Too few arguments.");
+        os << prt(regst(args[0]), c);
+    } else if (instr.compare("cmp") == 0) { // CMP instruction
+        if (args.size() < 2) throw invalid_argument("Too few arguments.");
+        os << cmp(regst(args[0]), regst(args[1]), c);
+    } else if (instr.compare("jmp") == 0) { // JMP instruction
+        if (args.size() < 1) invalid_argument("Too few arguments.");
+        // TODO: implement long jump as short ones cannot be done easily
+        try {
+            //os << jmp(, c);
+        } catch (out_of_range &e) {
+            throw e;
+        }
+    } else if (instr.compare("nop") == 0) { // NOP instruction
+        os << nop(c);
+    } else if (instr.compare("hlt") == 0) { // HLT instruction
+        os << hlt(c);
+    } else {
+        throw invalid_argument("Unknown instruction.");
+    }
     return os.str();
 }
 
@@ -122,8 +231,8 @@ string parsePrg(const string &src) {
         ++c;
         line = lc(trim(line)); // Trim and lowercase
         if (line.compare("") == 0 || line[0] == '#') continue; // Skip empty lines and comments
-        if (line.compare(".data") == 0) { sec = 1; ptr = 0x0008; continue; } // Start of data section
-        else if (line.compare(".prgm") == 0) { sec = 2; eod = ptr; ptr = 0x4000; continue; } // Start of prgm section
+        if (line.compare(".data") == 0) { sec = 1; ptr = mem_idat; continue; } // Start of data section
+        else if (line.compare(".prgm") == 0) { sec = 2; eod = ptr; ptr = mem_iprg; continue; } // Start of prgm section
         if (sec == 1) { // Write data
             vector<string> values;
             if (line[0] == '&') { // If there is a label on this line
@@ -141,11 +250,12 @@ string parsePrg(const string &src) {
                 try {
                     ptr += nom(line, d_lbl);
                 } catch (invalid_argument &e) {
-                    cerr << "Error on line " << c << nl;
+                    cerr << "Error on line " << c << ": " << e.what() << nl;
                 }
             }
         }
     }
+    if (mem_iprg < eod) cerr << "Error: data section exceeds ~32KB and therefore program cannot be compiled." << nl;
     bin << nl << (mem_iprg - eod) << "*0" << nl; // Fill remaining data section with 0s
     prg.close();
     // 2) Parse .prgm section
@@ -157,11 +267,18 @@ string parsePrg(const string &src) {
         if (line.compare("") == 0 || line[0] == '#') continue;
         if (line.compare(".prgm") == 0) { sec = 2; continue; }
         if (sec == 2) {
-            if (line[0] == '&') continue; // Skip labels
-            else bin << parseLine(line); // Parse single line
+            if (line[0] == '&') continue; // Skip labels, they've already been computed
+            else {
+                try {
+                    bin << parseLine(line, d_lbl, p_lbl); // Parse single line
+                } catch (invalid_argument &e) {
+                    cerr << "Error on line " << c << ": " << e.what() << nl;
+                } catch (out_of_range &e) {
+                    cerr << "Error on line " << c << ": " << e.what() << nl;
+                }
+            }
         }
     }
-    prg.close();
     prg.close();
     return bin.str();
 }

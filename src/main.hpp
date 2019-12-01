@@ -35,9 +35,9 @@ constexpr uint16_t mem_end = 0xffff; // Total memory: 128kB
 constexpr uint16_t mem_idat = 0x0008;
 constexpr uint16_t mem_edat = 0x3fff; // Program data: ~32kB [0x0 -> 0x7 (16B) reserved for initialization]
 constexpr uint16_t mem_iprg = 0x4000;
-constexpr uint16_t mem_eprg = 0xbfff; // Program instructions: 64kB
-constexpr uint16_t mem_istk = 0xc000;
-constexpr uint16_t mem_estk = 0xffff; // Stack: 32kB
+constexpr uint16_t mem_eprg = 0x7fff; // Program instructions: 32kB
+constexpr uint16_t mem_istk = 0x8000;
+constexpr uint16_t mem_estk = 0xffff; // Stack: 64kB
 
 // Condition codes
 enum cond : uint8_t { AL = 0x0, EQ = 0x1, NE = 0x2, LT = 0x3, LE = 0x4, GT = 0x5, GE = 0x6, VS = 0x7, VC = 0x8, CS = 0x9, CC = 0xa };

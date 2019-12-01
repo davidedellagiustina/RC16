@@ -1,0 +1,42 @@
+# PRODUCT IMPLEMENTATION
+# 
+# Davide Della Giustina
+# 01/12/2019
+
+.data
+    &n= 5
+    &m= 6
+
+.prgm
+
+    &main
+        put: r0, $n
+        ldr: r0, r0
+        put: r1, $m
+        ldr: r1, r1
+        cal: $mul
+        prt: r2
+        hlt
+
+    # PRODUCT
+    # @param r0: n
+    # @param r1: m
+    # @result r2: n*m
+    &mul
+        psh: r0
+        psh: r3
+        psh: r4
+        set: r2, 0
+        set: r3, 0
+        set: r4, 1
+    &mul_loop
+        cmp: r0, r3
+        jmpeq: $mul_exit
+        add: r2, r2, r1
+        sub: r0, r0, r4
+        jmp: $mul_loop
+    &mul_exit
+        pop: r4
+        pop: r3
+        pop: r0
+        ret

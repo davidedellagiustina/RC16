@@ -270,23 +270,16 @@ inline string cmp(const reg &r1, const reg &r2, const cond &c = AL) {
     return os.str();
 }
 
-// JMP <rel_addr>: jump to a certain address.
-// @param reladdr   Address to jump to. RELATIVE ADDRESS: this value is added to the current one (at the moment of this operation start). MAX: 63.
-// @param c         Conditional. Defualt: AL.
+// JMP <addr>: jump to a certain address.
+// @param addr      Address to jump to. OFFSET: this value is added to the start of the code segment. MAX: 0x3fff (32kB code segment covered).
 // @return          Hexadecimal string representation of command.
-inline string jmp(const int &reladdr, const cond &c = AL) {
+inline string jmp(const uint16_t &addr) {
     oss os;
-    // Since flags are not being updated, this version is fine
-    os << MOVREG(PC, A, c) << " ";
     try {
-        os << SET(B, reladdr, c) << " ";
-    } catch (invalid_argument &e) {
-        throw e;
+        os << JMP(addr) << " ";
     } catch (out_of_range &e) {
-        throw out_of_range("Cannot jump this long!");
+        throw e;
     }
-    os << EXC(ADD, false, false, c) << " ";
-    os << MOVREG(OUT, PC, c) << " ";
     return os.str();
 }
 

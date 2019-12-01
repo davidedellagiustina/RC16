@@ -64,7 +64,11 @@ inline string mov(const reg &r1, const reg &r2, const cond &c = AL) {
 inline string ldr(const reg &r, const reg &r_addr, const cond &c = AL) {
     oss os;
     os << MOVREG(r_addr, MAR, c) << " ";
-    os << MOVMEM(false, r, c) << " ";
+    try {
+        os << MOVMEM(false, r, c) << " ";
+    } catch (invalid_argument &e) {
+        throw e;
+    }
     return os.str();
 }
 
@@ -76,7 +80,11 @@ inline string ldr(const reg &r, const reg &r_addr, const cond &c = AL) {
 inline string str(const reg &r, const reg &r_addr, const cond &c = AL) {
     oss os;
     os << MOVREG(r_addr, MAR, c) << " ";
-    os << MOVMEM(true, r, c) << " ";
+    try {
+        os << MOVMEM(true, r, c) << " ";
+    } catch (invalid_argument &e) {
+        throw e;
+    }
     return os.str();
 }
 
@@ -274,14 +282,86 @@ inline string cmp(const reg &r1, const reg &r2, const cond &c = AL) {
 // @param addr      Address to jump to. OFFSET: this value is added to the start of the code segment. MAX: 0x3fff (32kB code segment covered).
 // @param c         Conditional. Default: AL.
 // @return          Hexadecimal string representation of command.
-inline string jmp(const uint16_t &addr, const cond &c) {
+inline string jmp(const uint16_t &addr, const cond &c = AL) {
     oss os;
     try {
         os << LJR(addr) << " "; // Load JR
-        os << MOVREG(JR, PC, c) << " "; // Move to PC (with condition)
     } catch (out_of_range &e) {
         throw e;
     }
+    os << MOVREG(JR, PC, c) << " "; // Move to PC (with condition)
+    return os.str();
+}
+
+// PSH <reg>: push a register to the stack.
+// @param r         Register to be pushed on the stack.
+// @param c         Conditional. Default: AL.
+// @return          Hexadecimal string representation of command.
+inline string psh(const reg &r, const cond &c = AL) {
+    oss os;
+    // Push register
+    os << MOVREG(LR, MAR, c) << " ";
+    try {
+        os << MOVMEM(true, r, c) << " ";
+    } catch (invalid_argument &e) {
+        throw e;
+    }
+    // Decrement link register
+    os << MOVREG(LR, A, c) << " ";
+    os << SET(B, 1, c) << " ";
+    os << EXC(ADD, true, false, c) << " ";
+    os << MOVREG(OUT, LR, c) << " ";
+    return os.str();
+}
+
+// POP <reg>: pop a register from the stack.
+// @param r         Register to be popped from the stack.
+// @param c         Conditional. Default: AL.
+// @return          Hexadecimal string representation of command.
+inline string pop(const reg &r, const cond &c = AL) {
+    oss os;
+    // Increment link register
+    os << MOVREG(LR, A, c) << " ";
+    os << SET(B, 1, c) << " ";
+    os << EXC(ADD, false, false, c) << " ";
+    os << MOVREG(OUT, LR, c) << " ";
+    // Pop register
+    os << MOVREG(LR, MAR, c) << " ";
+    try {
+        os << MOVMEM(false, r, c) << " ";
+    } catch (invalid_argument &e) {
+        throw e;
+    }
+    return os.str();
+}
+
+// CAL <addr>: call a function (label or address).
+// @param addr      Address to jump to.
+// @param c         Conditional. Default: AL.
+// @return          Hexadecimal string representation of command.
+inline string cal(const uint16_t &addr, const cond &c = AL) {
+    oss os;
+    // Compute address of next instruction (not PC points to next microinstruction)
+    os << MOVREG(PC, A, c) << " ";
+    os << SET(B, 5, c) << " ";
+    os << EXC(ADD, false, false, c) << " ";
+    os << MOVREG(OUT, LR, c) << " ";
+    // Jump
+    try {
+        os << LJR(addr) << " ";
+    } catch (invalid_argument &e) {
+        throw e;
+    }
+    os << MOVREG(JR, PC, c) << " ";
+    return os.str();
+}
+
+// RET: return from a function.
+// @param c         Conditional. Default: AL.
+// @return          Hexadecimal string representation of command.
+inline string ret(const cond &c = AL) {
+    oss os;
+    os << MOVREG(LR, PC, c) << " ";
     return os.str();
 }
 

@@ -100,12 +100,14 @@ inline int nom(const string &line, unordered_map<string,uint16_t> &d_lbl) {
 	} else if (instr.compare("add") == 0 || instr.compare("sub") == 0 || instr.compare("and") == 0 || instr.compare("orr") == 0 || instr.compare("eor") == 0 || instr.compare("lsl") == 0 || instr.compare("lsr") == 0 || instr.compare("asr") == 0) {
 		if (s && cnd != AL) c += 3;
 		c += 4;
+    // Six-microop commands
+    } else if (instr.compare("psh") == 0 || instr.compare("pop") == 0 || instr.compare("cal") == 0) c += 6;
     // Three-microop commands
-	} else if (instr.compare("cmp") == 0) c += 3;
+	else if (instr.compare("cmp") == 0) c += 3;
 	// Two-microop commands
 	else if (instr.compare("ldr") == 0 || instr.compare("str") == 0 || instr.compare("jmp") == 0) c += 2;
 	// One-microop commands
-	else if (instr.compare("set") == 0 || instr.compare("mov") == 0 || instr.compare("prt") == 0 || instr.compare("nop") == 0 || instr.compare("hlt") == 0) ++c;
+	else if (instr.compare("set") == 0 || instr.compare("mov") == 0 || instr.compare("prt") == 0 || instr.compare("ret") == 0 || instr.compare("nop") == 0 || instr.compare("hlt") == 0) ++c;
 	// Unknown command
 	else throw invalid_argument("Unknown instruction.");
 	return c;
@@ -210,6 +212,36 @@ inline string parseLine(const string &line, unordered_map<string,uint16_t> &d_lb
         } catch (out_of_range &e) {
             throw e;
         }
+    } else if (instr.compare("psh") == 0) { // PSH instruction
+        if (args.size() < 1) throw invalid_argument("Too few arguments.");
+        try {
+            os << psh(regst(args[0]), c);
+        } catch (invalid_argument &e) {
+            throw e;
+        }
+    } else if (instr.compare("pop") == 0) { // POP instruction
+        if (args.size() < 1) throw invalid_argument("Too few arguments.");
+        try {
+            os << pop(regst(args[0]), c);
+        } catch (invalid_argument &e) {
+            throw e;
+        }
+    } else if (instr.compare("cal") == 0) { // CAL instruction
+        if (args.size() < 1) throw invalid_argument("Too few arguments.");
+        uint16_t addr;
+        if (args[0][0] == '$') { // Label
+            if (p_lbl.find(args[0].substr(1)) == p_lbl.end()) throw invalid_argument("Invalid label.");
+            addr = p_lbl[args[0].substr(1)];
+        } else if (args[0][1] == 'x') addr = (uint16_t)stoi(args[0], 0, 16); // Hexadecimal address
+        else addr = (uint16_t)atoi(args[0].c_str()); // Decimal address
+        addr -= mem_iprg; // 'addr' is an offset inside code segment
+        try {
+            os << cal(addr, c);
+        } catch (invalid_argument &e) {
+            throw e;
+        }
+    } else if (instr.compare("ret") == 0) { // RET instruction
+        os << ret(c);
     } else if (instr.compare("nop") == 0) { // NOP instruction
         os << nop(c);
     } else if (instr.compare("hlt") == 0) { // HLT instruction

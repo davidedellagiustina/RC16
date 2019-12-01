@@ -136,18 +136,20 @@ inline string parseLine(const string &line, unordered_map<string,uint16_t> &d_lb
     if (instr.compare("put") == 0) { // PUT instruction
         if (args.size() < 2) throw invalid_argument("Too few arguments.");
         uint16_t imm_val;
-        if (args[1][0] == '$') {
+        if (args[1][0] == '$') { // Label
             if (d_lbl.find(args[1].substr(1)) == d_lbl.end()) throw invalid_argument("Invalid label.");
             imm_val = d_lbl[args[1].substr(1)];
-        } else imm_val = (uint16_t)atoi(args[1].c_str());
+        } else if (args[1][1] == 'x') imm_val = (uint16_t)stoi(args[1], 0, 16); // Hexadecimal address
+        else imm_val = (uint16_t)atoi(args[1].c_str()); // Decimal address
         os << put(regst(args[0]), imm_val, c);
     } else if (instr.compare("set") == 0) { // SET instruction
         if (args.size() < 2) throw invalid_argument("Too few arguments.");
         int imm_val;
-        if (args[1][0] == '$') {
+        if (args[1][0] == '$') { // Label
             if (d_lbl.find(args[1].substr(1)) == d_lbl.end()) throw invalid_argument("Invalid label.");
             imm_val = d_lbl[args[1].substr(1)];
-        } else imm_val = (uint16_t)atoi(args[1].c_str());
+        } else if (args[1][1] == 'x') imm_val = (uint16_t)stoi(args[1], 0, 16); // Hexadecimal address
+        else imm_val = (uint16_t)atoi(args[1].c_str()); // Decimal address
         try {
             os << set(regst(args[0]), imm_val, c);
         } catch (invalid_argument &e) {

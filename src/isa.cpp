@@ -300,17 +300,17 @@ inline string jmp(const uint16_t &addr, const cond &c = AL) {
 inline string psh(const reg &r, const cond &c = AL) {
     oss os;
     // Push register
-    os << MOVREG(LR, MAR, c) << " ";
+    os << MOVREG(SP, MAR, c) << " ";
     try {
         os << MOVMEM(true, r, c) << " ";
     } catch (invalid_argument &e) {
         throw e;
     }
     // Decrement link register
-    os << MOVREG(LR, A, c) << " ";
+    os << MOVREG(SP, A, c) << " ";
     os << SET(B, 1, c) << " ";
     os << EXC(ADD, true, false, c) << " ";
-    os << MOVREG(OUT, LR, c) << " ";
+    os << MOVREG(OUT, SP, c) << " ";
     return os.str();
 }
 
@@ -321,12 +321,12 @@ inline string psh(const reg &r, const cond &c = AL) {
 inline string pop(const reg &r, const cond &c = AL) {
     oss os;
     // Increment link register
-    os << MOVREG(LR, A, c) << " ";
+    os << MOVREG(SP, A, c) << " ";
     os << SET(B, 1, c) << " ";
     os << EXC(ADD, false, false, c) << " ";
-    os << MOVREG(OUT, LR, c) << " ";
+    os << MOVREG(OUT, SP, c) << " ";
     // Pop register
-    os << MOVREG(LR, MAR, c) << " ";
+    os << MOVREG(SP, MAR, c) << " ";
     try {
         os << MOVMEM(false, r, c) << " ";
     } catch (invalid_argument &e) {

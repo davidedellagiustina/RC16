@@ -22,6 +22,7 @@
 #define maxjmp_err      out_of_range("The given address exceeds code segment length.")
 #define ireg(r)         ((r>=R0 && r<=R7) || r==A || r==B || r==MAR || r==OR) // Valid input registers
 #define oreg(r)         ((r>=R0 && r<=R7) || r==OUT) // Valid output registers
+#define spec(r)         (r==JR) // Special output register (JR)
 #define ireg_err        invalid_argument("The given register is not a valid input register.")
 #define oreg_err        invalid_argument("The given register is not a valid output register.")
 
@@ -33,8 +34,10 @@
 inline string MOVREG(const reg &r1, const reg &r2, const cond &c = AL) {
     uint16_t instr = 0x4000; // MOV(reg->reg) = 0b01.xxxx.0.xxxx.xxxx.0
     instr |= c << 10; // Add conditional
-    if (oreg(r1)) instr |= r1 << 5; // Add source register
+    if (oreg(r1) || spec(r1)) instr |= r1 << 5; // Add source register
+    else throw oreg_err;
     if (ireg(r2)) instr |= r2 << 1; // Add destination register
+    else throw ireg_err;
     return bin2hex(instr);
 }
 
@@ -84,10 +87,10 @@ inline string EXC(const alu_op &opcode, const bool &notb, const bool &setflags, 
     return bin2hex(instr);
 }
 
-// Implement JMP instruction.
-// @param addr      Address to jump to (offset based on start of code segment) [14 bits].
+// Implement LJR instruction.
+// @param addr      Address to load to the jump register (offset based on start of code segment) [14 bits].
 // @return          Hexadecimal string representation of instruction.
-inline string JMP(const uint16_t &addr) {
+inline string LJR(const uint16_t &addr) {
     uint16_t instr = 0x1; // JMP = 0b0.xxxxxxxxxxxxxx.1
     if (addr < minjmp) throw minjmp_err;
     else if (addr > maxjmp) throw maxjmp_err;

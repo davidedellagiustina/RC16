@@ -62,7 +62,7 @@ inline cond condition(const string &c) {
 inline reg regst(const string &r) {
     unordered_map<string,reg> m;
     m["r0"] = R0; m["r1"] = R1; m["r2"] = R2; m["r3"] = R3; m["r4"] = R4; m["r5"] = R5; m["sp"] = SP; m["r6"] = R6; m["lr"] = LR; m["r7"] = R7; m["pc"] = PC;
-    m["a"] = A; m["b"] = B; m["out"] = OUT; m["mar"] = MAR; m["or"] = OR;
+    m["a"] = A; m["b"] = B; m["out"] = OUT; m["mar"] = MAR; m["or"] = OR; m["jr"] = JR;
     return m[r];
 }
 
@@ -103,9 +103,9 @@ inline int nom(const string &line, unordered_map<string,uint16_t> &d_lbl) {
     // Three-microop commands
 	} else if (instr.compare("cmp") == 0) c += 3;
 	// Two-microop commands
-	else if (instr.compare("ldr") == 0 || instr.compare("str") == 0) c += 2;
+	else if (instr.compare("ldr") == 0 || instr.compare("str") == 0 || instr.compare("jmp") == 0) c += 2;
 	// One-microop commands
-	else if (instr.compare("set") == 0 || instr.compare("mov") == 0 || instr.compare("prt") == 0 || instr.compare("jmp") == 0 || instr.compare("nop") == 0 || instr.compare("hlt") == 0) ++c;
+	else if (instr.compare("set") == 0 || instr.compare("mov") == 0 || instr.compare("prt") == 0 || instr.compare("nop") == 0 || instr.compare("hlt") == 0) ++c;
 	// Unknown command
 	else throw invalid_argument("Unknown instruction.");
 	return c;
@@ -204,7 +204,7 @@ inline string parseLine(const string &line, unordered_map<string,uint16_t> &d_lb
         else addr = (uint16_t)atoi(args[0].c_str()); // Decimal address
         addr -= mem_iprg; // 'addr' is an offset inside code segment
         try {
-            os << jmp(addr);
+            os << jmp(addr, c);
         } catch (out_of_range &e) {
             throw e;
         }

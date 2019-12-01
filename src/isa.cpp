@@ -272,11 +272,13 @@ inline string cmp(const reg &r1, const reg &r2, const cond &c = AL) {
 
 // JMP <addr>: jump to a certain address.
 // @param addr      Address to jump to. OFFSET: this value is added to the start of the code segment. MAX: 0x3fff (32kB code segment covered).
+// @param c         Conditional. Default: AL.
 // @return          Hexadecimal string representation of command.
-inline string jmp(const uint16_t &addr) {
+inline string jmp(const uint16_t &addr, const cond &c) {
     oss os;
     try {
-        os << JMP(addr) << " ";
+        os << LJR(addr) << " "; // Load JR
+        os << MOVREG(JR, PC, c) << " "; // Move to PC (with condition)
     } catch (out_of_range &e) {
         throw e;
     }

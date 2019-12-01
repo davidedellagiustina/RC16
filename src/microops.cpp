@@ -16,6 +16,10 @@
 #define maxval          0x3f // Max immediate value
 #define minval_err      out_of_range("The given immediate value is negative.")
 #define maxval_err      out_of_range("The given immediate value exceeds 6 bits.")
+#define minjmp          0x0
+#define maxjmp          0x3fff
+#define minjmp_err      out_of_range("The given jump address is negative.")
+#define maxjmp_err      out_of_range("The given address exceeds code segment length.")
 #define ireg(r)         ((r>=R0 && r<=R7) || r==A || r==B || r==MAR || r==OR) // Valid input registers
 #define oreg(r)         ((r>=R0 && r<=R7) || r==OUT) // Valid output registers
 #define ireg_err        invalid_argument("The given register is not a valid input register.")
@@ -80,6 +84,17 @@ inline string EXC(const alu_op &opcode, const bool &notb, const bool &setflags, 
     return bin2hex(instr);
 }
 
+// Implement JMP instruction.
+// @param addr      Address to jump to (offset based on start of code segment) [14 bits].
+// @return          Hexadecimal string representation of instruction.
+inline string JMP(const uint16_t &addr) {
+    uint16_t instr = 0x1; // JMP = 0b0.xxxxxxxxxxxxxx.1
+    if (addr < minjmp) throw minjmp_err;
+    else if (addr > maxjmp) throw maxjmp_err;
+    instr |= addr << 1; // Add offset inside code segment
+    return bin2hex(instr);
+}
+
 // Implement NOP instruction.
 // @param c         Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
@@ -93,7 +108,7 @@ inline string NOP(const cond &c = AL) {
 // @param c         Conditional [4 bits]. Default: AL.
 // @return          Hexadecimal string representation of instruction.
 inline string HLT(const cond &c = AL) {
-    uint16_t instr = 0x1; // HLT = 0b00.xxxx.000000000.1
+    uint16_t instr = 0x200; // HLT = 0b00.xxxx.1.000000000
     instr |= c << 10; // Add conditional
     return bin2hex(instr);
 }

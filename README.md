@@ -4,7 +4,7 @@ RC16 is a 16bit RISC computer which features a well-designed hardware, implement
 
 ![Screenshot](imgs/cpu.png)
 
-# Usage
+## Usage
 
 First of all run `make` in order to install the RC16 Compiler. Next, you need to write a working program. Some examples can be found in the relative folder. Once done that, run `rcc -i <file>.rc [-o <file>.bin]` to compile your program. Finally, open Logisim and load the generated `<file>.bin` fine into the RAM module. To execute the program, toggle the `power` switch in the main view and hit `Ctrl-K`. For further details head to this repository's wiki.
 
